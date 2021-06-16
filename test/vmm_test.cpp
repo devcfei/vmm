@@ -377,3 +377,65 @@ TEST(VmaTest, Free)
 
 
 }
+
+
+TEST(VmaTest, Defrag)
+{
+    Result r;
+    vmaObject_t vma;
+    vmaHandle hVma = &vma;
+
+    /*
+     *  allocated : na
+     *  free: 0x00000-0xFFFFF
+     */
+    vmaInit(hVma,0x100000);
+    Void* va;
+
+
+    /*
+     *  allocated : 0x00000 - 0x000FF
+     *  free: 0x00100 - 0xFFFFF
+     */
+    r = vmaAlloc(hVma,0x100,0x100,&va);
+    EXPECT_EQ(r, resOk);
+    EXPECT_EQ(va,(Void*)0x0);
+
+
+    /*
+     *  allocated : na
+     *  free: 0x00000 - 0x000FF
+     *  free: 0x00100 - 0xFFFFF
+     */
+    r = vmaFree(hVma,va);
+    EXPECT_EQ(r, resOk);
+
+    /*
+     *  allocated : 0x00100 - 0x010FF
+     *  free: 0x00000 - 0x000FF
+     *  free: 0x01100 - 0xFFFFF
+     */
+    r = vmaAlloc(hVma,0x1000,0x100,&va);    
+    EXPECT_EQ(r, resOk);
+    EXPECT_EQ(va,(Void*)0x100);
+
+    /*
+     *  allocated : na
+     *  free: 0x00000 - 0x000FF
+     *  free: 0x01100 - 0xFFFFF
+     *  free: 0x00100 - 0x010FF
+     */
+    r = vmaFree(hVma,va);
+    EXPECT_EQ(r, resOk);
+
+    /*
+     *  allocated : na
+     *  free: 0x00000-0xFFFFF
+     */
+    r = vmaDefrag(hVma);
+
+
+    r = vmaAlloc(hVma,0x1000,0x1000,&va);
+    EXPECT_EQ(r, resOk);
+    EXPECT_EQ(va,(Void*)0x0);   
+}

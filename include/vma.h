@@ -44,5 +44,10 @@ vmaFree(
 	Void* vaFree
 	);
 
+Result
+vmaDefrag(
+	vmaHandle hVma
+	);
+
 
 #endif /*__VMA_H__*/

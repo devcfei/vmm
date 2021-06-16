@@ -169,3 +169,44 @@ vmaFree(
 
     return r;
 }
+
+
+
+Result
+vmaDefrag(
+	vmaHandle hVma
+	)
+{
+    Result r = resOk;
+
+    listHead freeList = &hVma->listFree;
+    vmaItem_t *item;
+
+    /*
+	 *  Go through the free list and find the entries which are contiguous.
+	 */
+
+    LIST_FOR_EACH(freeList, nextNode)
+    {
+        item = TYPE_BASE(nextNode, vmaItem_t, node);
+
+        listNode *backNode = nextNode->next;
+        if (backNode)
+        {
+            vmaItem_t *itemBack;
+
+            itemBack = TYPE_BASE(backNode, vmaItem_t, node);
+            if (((Size_t)item->va + item->size) == (Size_t)itemBack->va)
+            {
+                itemBack->va = item->va;
+                itemBack->size += item->size;
+
+                listRemoveNode(nextNode);
+
+                vmaItemFree(hVma, item);
+            }
+        }
+    }
+
+    return r;
+}
