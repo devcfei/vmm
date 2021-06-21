@@ -24,7 +24,7 @@ typedef struct testListItem_s
 } testListItem_t;
 
 
-}
+} /*extern "C"*/
 
 
 TEST(Vmm, Basic) 
@@ -168,6 +168,11 @@ TEST(Stack, stackBasic)
     EXPECT_EQ(r, resNoMore);
 }
 
+#define MAX_VA_COUNT 0x1000 
+
+static Size_t stackItemGlobal[MAX_VA_COUNT];
+static vmaItem_t vmaItemGlobal[MAX_VA_COUNT];
+
 
 TEST(VmaTest, Allocate)
 {
@@ -179,7 +184,7 @@ TEST(VmaTest, Allocate)
      *  allocated : na
      *  free: 0x00000-0xFFFFF
      */
-    vmaInit(hVma,0x100000);
+    vmaInit(hVma,0x100000,stackItemGlobal,vmaItemGlobal);
     Void* va;
 
     /*
@@ -344,7 +349,7 @@ TEST(VmaTest, Free)
      *  allocated : na
      *  free: 0x00000-0xFFFFF
      */
-    vmaInit(hVma,0x100000);
+    vmaInit(hVma,0x100000,stackItemGlobal,vmaItemGlobal);
     Void* va;
 
 
@@ -389,7 +394,7 @@ TEST(VmaTest, Defrag)
      *  allocated : na
      *  free: 0x00000-0xFFFFF
      */
-    vmaInit(hVma,0x100000);
+    vmaInit(hVma,0x100000,stackItemGlobal,vmaItemGlobal);
     Void* va;
 
 

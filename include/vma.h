@@ -17,6 +17,8 @@ typedef struct vmaObject_s
 
 
     stackObject_t itemStack;
+	Size_t sizeTotol;
+	Size_t countTotolItem;
 
 }vmaObject_t;
 
@@ -27,7 +29,9 @@ typedef vmaObject_t* vmaHandle;
 Result
 vmaInit(
 	vmaHandle hVma,
-	Size_t sizeTotal
+	Size_t sizeTotal,
+    Size_t *baseVmaItemStack,
+    vmaItem_t* bufVmaItem
 	);
 
 Result

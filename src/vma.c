@@ -1,12 +1,6 @@
 #include <vmm.h>
 
 
-#define MAX_VA_COUNT 0x1000 
-
-static Size_t stackItemGlobal[MAX_VA_COUNT];
-static vmaItem_t vmaItemGlobal[MAX_VA_COUNT];
-
-
 static
 vmaItem_t*
 vmaItemAlloc(
@@ -18,6 +12,8 @@ vmaItemAlloc(
     Size_t i;
     stackHandle hStack = &hVma->itemStack;
     r = stackPop(hStack, &i);
+    if(FAILED(r))
+        return NULL_PTR;
 
     return (vmaItem_t *)i;
 }
@@ -44,7 +40,9 @@ vmaItemFree(
 Result
 vmaInit(
 	vmaHandle hVma,
-	Size_t sizeTotal
+	Size_t sizeTotal,
+    Size_t *baseVmaItemStack,
+    vmaItem_t* bufVmaItem
 	)
 {
     Result r = resOk;
@@ -53,14 +51,18 @@ vmaInit(
     listInit(&hVma->listAllocated);
     listInit(&hVma->listFree);
 
-    stackInit(hStack, stackItemGlobal, MAX_VA_COUNT);
+
+    hVma->sizeTotol = sizeTotal;
+    hVma->countTotolItem = sizeTotal/PAGE_SIZE;
+
+    stackInit(hStack, baseVmaItemStack, hVma->countTotolItem);
 
     /*
      *  Push the items to the stack    
      */
-    for (Size_t i = 0; i < MAX_VA_COUNT; ++i)
+    for (Size_t i = 0; i < hVma->countTotolItem; ++i)
     {
-        vmaItemFree(hVma, &vmaItemGlobal[i]);
+        vmaItemFree(hVma, &bufVmaItem[i]);
     }
 
     vmaItem_t *item = vmaItemAlloc(hVma);
